@@ -82,7 +82,17 @@ def generate_invoice():
     p.drawString(width - 200, height - 160, f'Date: {date}')
 
     # Add table header
-    table_data = [['Date', 'Ticket', 'Truck #', 'Hours', 'Price Per Hour', 'Total', 'Location']]
+    table_data = [
+        [
+            Paragraph('Date', styles['Normal']),
+            Paragraph('Ticket', styles['Normal']),
+            Paragraph('Truck #', styles['Normal']),
+            Paragraph('Hours', styles['Normal']),
+            Paragraph('Price Per Hour', styles['Normal']),
+            Paragraph('Total', styles['Normal']),
+            Paragraph('Location', styles['Normal'])
+        ]
+    ]
     
     # Add rows to the table
     for index, row in df.iterrows():
