@@ -9,7 +9,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle, Paragraph
 from reportlab.lib.units import inch
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 app = Flask(__name__)
 
@@ -81,16 +81,19 @@ def generate_invoice():
     p.drawString(width - 200, height - 140, f'Invoice: {invoice_number}')
     p.drawString(width - 200, height - 160, f'Date: {date}')
 
-    # Add table header
+    # Define a bold style for the table header
+    bold_style = ParagraphStyle(name='Bold', parent=styles['Normal'], fontName='Helvetica-Bold')
+
+    # Add table header with bold text
     table_data = [
         [
-            Paragraph('Date', styles['Normal']),
-            Paragraph('Ticket', styles['Normal']),
-            Paragraph('Truck #', styles['Normal']),
-            Paragraph('Hours', styles['Normal']),
-            Paragraph('Price Per Hour', styles['Normal']),
-            Paragraph('Total', styles['Normal']),
-            Paragraph('Location', styles['Normal'])
+            Paragraph('Date', bold_style),
+            Paragraph('Ticket', bold_style),
+            Paragraph('Truck #', bold_style),
+            Paragraph('Hours', bold_style),
+            Paragraph('Price Per Hour', bold_style),
+            Paragraph('Total', bold_style),
+            Paragraph('Location', bold_style)
         ]
     ]
     
