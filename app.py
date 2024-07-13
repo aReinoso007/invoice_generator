@@ -31,27 +31,39 @@ def index():
 @app.route('/generate-invoice', methods=['POST'])
 def generate_invoice():
     data = request.json
+    print("Received data:", data)
 
     # Extract and format additional fields
-    bill_to = data.get('bill_to', '')
-    invoice_number = data.get('invoice_number', '')
-    date = data.get('date', '')
+    bill_to = data.get('bill_to', [''])[0]
+    invoice_number = data.get('invoice_number', [''])[0]
+    date = data.get('date', [''])[0]
+    print("Bill To:", bill_to)
+    print("Invoice Number:", invoice_number)
+    print("Date:", date)
 
-    # Create a DataFrame with the remaining data
-    invoice_data = {
-        'date': [data.get('date', '')],
-        'ticket': [data.get('ticket', '')],
-        'truck': [data.get('truck', '')],
-        'hours': [data.get('hours', 0)],
-        'price': [data.get('price', 0)],
-        'location': [data.get('location', '')]
+    # Ensure table data is in list format
+    table_data = {
+        'date': data.get('table_date[]', []),
+        'ticket': data.get('table_ticket[]', []),
+        'truck': data.get('table_truck[]', []),
+        'hours': data.get('table_hours[]', []),
+        'price': data.get('table_price[]', []),
+        'location': data.get('table_location[]', [])
     }
 
-    df = pd.DataFrame(invoice_data)
-    df["Total"] = df["hours"].astype(int) * df["price"].astype(int)
+    print("Table data:", table_data)
+
+    df = pd.DataFrame(table_data)
+
+    # Replace empty strings with zero before converting to float
+    df["hours"] = df["hours"].replace('', 0).astype(float)
+    df["price"] = df["price"].replace('', 0).astype(float)
+
+    df["Total"] = df["hours"] * df["price"]
     total_hours = df["hours"].sum()
     total_amount = df["Total"].sum()
-    
+    print("DataFrame:", df)
+
     # Create a PDF
     output = io.BytesIO()
     p = canvas.Canvas(output, pagesize=letter)
@@ -85,36 +97,37 @@ def generate_invoice():
     bold_style = ParagraphStyle(name='Bold', parent=styles['Normal'], fontName='Helvetica-Bold')
 
     # Add table header with bold text
-    table_data = [
-        [
-            Paragraph('Date', bold_style),
-            Paragraph('Ticket', bold_style),
-            Paragraph('Truck #', bold_style),
-            Paragraph('Hours', bold_style),
-            Paragraph('Price Per Hour', bold_style),
-            Paragraph('Total', bold_style),
-            Paragraph('Location', bold_style)
-        ]
+    table_header = [
+        Paragraph('Date', bold_style),
+        Paragraph('Ticket', bold_style),
+        Paragraph('Truck #', bold_style),
+        Paragraph('Hours', bold_style),
+        Paragraph('Price Per Hour', bold_style),
+        Paragraph('Total', bold_style),
+        Paragraph('Location', bold_style)
     ]
     
-    # Add rows to the table
+    # Create table data for PDF
+    table_data_pdf = [table_header]
     for index, row in df.iterrows():
-        table_data.append([
-            str(row['date']),
-            str(row['ticket']),
-            str(row['truck']),
-            str(row['hours']),
-            str(row['price']),
-            str(row['Total']),
-            Paragraph(str(row['location']), styles['Normal'])
+        table_data_pdf.append([
+            row['date'],
+            row['ticket'],
+            row['truck'],
+            row['hours'],
+            row['price'],
+            row['Total'],
+            Paragraph(row['location'], styles['Normal'])
         ])
     
     # Add summary row
-    table_data.append(['', '', '', f'Total Hours: {total_hours}', '', f'Total: {total_amount}', ''])
+    table_data_pdf.append(['', '', '', f'Total Hours: {total_hours}', '', f'Total: {total_amount}', ''])
+
+    print("PDF Table Data:", table_data_pdf)
     
     # Create the table
     col_widths = [(width - 2 * margin) / 7] * 7  # Adjust column widths to fill the page width with margins
-    table = Table(table_data, colWidths=col_widths)
+    table = Table(table_data_pdf, colWidths=col_widths)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
@@ -136,6 +149,8 @@ def generate_invoice():
     p.save()
     
     output.seek(0)
+
+    print("PDF generated successfully.")
 
     # Log the document creation
     log_entry = {

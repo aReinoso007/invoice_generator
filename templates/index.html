@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Generator</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
     <h1>Invoice Generator</h1>
@@ -14,22 +31,110 @@
         <input type="text" id="invoice_number" name="invoice_number"><br><br>
         <label for="date">Date:</label>
         <input type="text" id="date" name="date"><br><br>
-        <label for="ticket">Ticket:</label>
-        <input type="text" id="ticket" name="ticket"><br><br>
-        <label for="truck">Truck #:</label>
-        <input type="text" id="truck" name="truck"><br><br>
-        <label for="hours">Hours:</label>
-        <input type="text" id="hours" name="hours"><br><br>
-        <label for="price">Price Per Hour:</label>
-        <input type="text" id="price" name="price"><br><br>
-        <label for="location">Location:</label>
-        <input type="text" id="location" name="location"><br><br>
+
+        <h2>Table Rows</h2>
+        <table id="invoice-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Ticket</th>
+                    <th>Truck #</th>
+                    <th>Hours</th>
+                    <th>Price Per Hour</th>
+                    <th>Location</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <tr>
+                    <td><input type="text" name="table_date[]"></td>
+                    <td><input type="text" name="table_ticket[]"></td>
+                    <td><input type="text" name="table_truck[]"></td>
+                    <td><input type="text" name="table_hours[]"></td>
+                    <td><input type="text" name="table_price[]"></td>
+                    <td><input type="text" name="table_location[]"></td>
+                    <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="button" onclick="addRow()">Add Row</button><br><br>
         <input type="submit" value="Generate Invoice">
     </form>
 
-    <h2>Documents Created</h2>
-    <ul id="document-list"></ul>
+    <h2>Preview</h2>
+    <div id="preview"></div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        function addRow() {
+            const tableBody = document.getElementById('table-body');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" name="table_date[]"></td>
+                <td><input type="text" name="table_ticket[]"></td>
+                <td><input type="text" name="table_truck[]"></td>
+                <td><input type="text" name="table_hours[]"></td>
+                <td><input type="text" name="table_price[]"></td>
+                <td><input type="text" name="table_location[]"></td>
+                <td><button type="button" onclick="removeRow(this)">Remove</button></td>
+            `;
+            tableBody.appendChild(newRow);
+            updatePreview();
+        }
+
+        function removeRow(button) {
+            const row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            updatePreview();
+        }
+
+        document.getElementById('invoice-form').addEventListener('input', updatePreview);
+
+        function updatePreview() {
+            const tableBody = document.getElementById('table-body');
+            let previewHTML = '<table><thead><tr><th>Date</th><th>Ticket</th><th>Truck #</th><th>Hours</th><th>Price Per Hour</th><th>Total</th><th>Location</th></tr></thead><tbody>';
+            const rows = tableBody.getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('input');
+                let total = 0;
+                if (cells[3].value && cells[4].value) {
+                    total = parseFloat(cells[3].value) * parseFloat(cells[4].value);
+                }
+                previewHTML += '<tr>';
+                for (let j = 0; j < cells.length; j++) {
+                    previewHTML += `<td>${cells[j].value}</td>`;
+                }
+                previewHTML += `<td>${total}</td></tr>`;
+            }
+            previewHTML += '</tbody></table>';
+            document.getElementById('preview').innerHTML = previewHTML;
+        }
+
+        document.getElementById('invoice-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                if (!data[key]) {
+                    data[key] = [];
+                }
+                data[key].push(value);
+            });
+            const response = await fetch('/generate-invoice', {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'invoice.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        });
+    </script>
 </body>
 </html>
