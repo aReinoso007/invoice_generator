@@ -141,9 +141,16 @@ def generate_invoice():
         ('WORDWRAP', (0, 0), (-1, -1), 'LTR')
     ]))
 
-    # Calculate the table width and position it with margins
+    # Calculate the height of the table
+    table_height = table.wrap(width, height)[1]
+    available_height = height - 300 - table_height
+
+    # Set a fixed starting position for the table to avoid it being too far down
+    fixed_table_position = height - 450  # Adjust this value as needed
+
+    # Ensure the table doesn't overlap with other elements
     table.wrapOn(p, width, height)
-    table.drawOn(p, margin, height - 300)  # Adjust the position to account for the wrapped Bill To text
+    table.drawOn(p, margin, fixed_table_position)
     
     p.showPage()
     p.save()
