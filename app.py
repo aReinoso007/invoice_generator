@@ -70,6 +70,19 @@ def generate_invoice():
     total_amount = df["Total"].sum()
     print("DataFrame:", df)
 
+    # Extract label data
+    labels = data.get('label_text[]', [])
+    checks = data.get('label_check[]', [])
+
+    if not isinstance(labels, list):
+        labels = [labels]
+
+    if not isinstance(checks, list):
+        checks = [checks]
+
+    print("Labels:", labels)
+    print("Checks:", checks)
+
     # Create a PDF
     output = io.BytesIO()
     doc = SimpleDocTemplate(output, pagesize=letter,
@@ -173,17 +186,12 @@ def generate_invoice():
 
     # Add the table to the elements list
     elements.append(table)
-    elements.append(Spacer(1, 12))
+    elements.append(Spacer(1, 24))
 
     # Add labels and checks
-    label_texts = data.get('label_text[]', [])
-    label_checks = data.get('label_check[]', [])
-    
-    for label, check in zip(label_texts, label_checks):
-        check_mark = '✔' if check else ''
-        label_paragraph = Paragraph(f'{label}: {check_mark}', styles['Normal'])
-        elements.append(label_paragraph)
-        elements.append(Spacer(1, 6))
+    for label, check in zip(labels, checks):
+        checkmark = '✔' if check else ''
+        elements.append(Paragraph(f'{label}: {checkmark}', styles['Normal']))
 
     # Build the PDF
     doc.build(elements)

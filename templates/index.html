@@ -38,6 +38,10 @@
         #add-row, #add-label-row {
             margin-bottom: 20px;
         }
+        .remove-row {
+            cursor: pointer;
+            color: red;
+        }
         .preview {
             margin: 20px auto;
             width: 80%;
@@ -72,6 +76,7 @@
                 <th>Hours</th>
                 <th>Price Per Hour</th>
                 <th>Location</th>
+                <th>Remove</th>
             </tr>
             <tr>
                 <td><input type="date" name="table_date[]"></td>
@@ -80,6 +85,7 @@
                 <td><input type="number" name="table_hours[]"></td>
                 <td><input type="number" name="table_price[]"></td>
                 <td><input type="text" name="table_location[]"></td>
+                <td class="remove-row">X</td>
             </tr>
         </table>
         <button type="button" id="add-row">Add Row</button>
@@ -89,10 +95,12 @@
             <tr>
                 <th>Label</th>
                 <th>Check</th>
+                <th>Remove</th>
             </tr>
             <tr>
                 <td><input type="text" name="label_text[]"></td>
                 <td><input type="checkbox" name="label_check[]"></td>
+                <td class="remove-label-row">X</td>
             </tr>
         </table>
         <button type="button" id="add-label-row">Add Label</button>
@@ -160,12 +168,22 @@
             }
 
             $('#add-row').click(function() {
-                $('#invoice-details-table').append('<tr><td><input type="date" name="table_date[]"></td><td><input type="text" name="table_ticket[]"></td><td><input type="text" name="table_truck[]"></td><td><input type="number" name="table_hours[]"></td><td><input type="number" name="table_price[]"></td><td><input type="text" name="table_location[]"></td></tr>');
+                $('#invoice-details-table').append('<tr><td><input type="date" name="table_date[]"></td><td><input type="text" name="table_ticket[]"></td><td><input type="text" name="table_truck[]"></td><td><input type="number" name="table_hours[]"></td><td><input type="number" name="table_price[]"></td><td><input type="text" name="table_location[]"></td><td class="remove-row">X</td></tr>');
+                updatePreview();
+            });
+
+            $('#invoice-details-table').on('click', '.remove-row', function() {
+                $(this).closest('tr').remove();
                 updatePreview();
             });
 
             $('#add-label-row').click(function() {
-                $('#labels-table').append('<tr><td><input type="text" name="label_text[]"></td><td><input type="checkbox" name="label_check[]"></td></tr>');
+                $('#labels-table').append('<tr><td><input type="text" name="label_text[]"></td><td><input type="checkbox" name="label_check[]"></td><td class="remove-label-row">X</td></tr>');
+                updatePreview();
+            });
+
+            $('#labels-table').on('click', '.remove-label-row', function() {
+                $(this).closest('tr').remove();
                 updatePreview();
             });
 
