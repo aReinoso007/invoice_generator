@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+</head>
+<body>
+    <h1>Invoice Generator</h1>
+    <form id="invoice-form">
+        <label for="bill_to">Bill To:</label>
+        <textarea id="bill_to" name="bill_to" rows="3" cols="40"></textarea><br><br>
+        <label for="invoice_number">Invoice Number:</label>
+        <input type="text" id="invoice_number" name="invoice_number"><br><br>
+        <label for="date">Date:</label>
+        <input type="text" id="date" name="date"><br><br>
+        <label for="ticket">Ticket:</label>
+        <input type="text" id="ticket" name="ticket"><br><br>
+        <label for="truck">Truck #:</label>
+        <input type="text" id="truck" name="truck"><br><br>
+        <label for="hours">Hours:</label>
+        <input type="text" id="hours" name="hours"><br><br>
+        <label for="price">Price Per Hour:</label>
+        <input type="text" id="price" name="price"><br><br>
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location"><br><br>
+        <input type="submit" value="Generate Invoice">
+    </form>
+
+    <h2>Documents Created</h2>
+    <ul id="document-list"></ul>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
