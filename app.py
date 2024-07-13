@@ -173,6 +173,17 @@ def generate_invoice():
 
     # Add the table to the elements list
     elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Add labels and checks
+    label_texts = data.get('label_text[]', [])
+    label_checks = data.get('label_check[]', [])
+    
+    for label, check in zip(label_texts, label_checks):
+        check_mark = '✔' if check else ''
+        label_paragraph = Paragraph(f'{label}: {check_mark}', styles['Normal'])
+        elements.append(label_paragraph)
+        elements.append(Spacer(1, 6))
 
     # Build the PDF
     doc.build(elements)

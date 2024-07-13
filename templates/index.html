@@ -35,7 +35,7 @@
         th {
             background-color: #f2f2f2;
         }
-        #add-row {
+        #add-row, #add-label-row {
             margin-bottom: 20px;
         }
         .preview {
@@ -83,6 +83,20 @@
             </tr>
         </table>
         <button type="button" id="add-row">Add Row</button>
+
+        <h3>Labels with Checkmarks</h3>
+        <table id="labels-table">
+            <tr>
+                <th>Label</th>
+                <th>Check</th>
+            </tr>
+            <tr>
+                <td><input type="text" name="label_text[]"></td>
+                <td><input type="checkbox" name="label_check[]"></td>
+            </tr>
+        </table>
+        <button type="button" id="add-label-row">Add Label</button>
+
         <button type="submit">Generate Invoice</button>
     </form>
 
@@ -133,11 +147,25 @@
                 });
 
                 previewHtml += '</table>';
+
+                $('#labels-table tr:gt(0)').each(function() {
+                    var row = $(this);
+                    var labelText = row.find('input[name="label_text[]"]').val();
+                    var labelCheck = row.find('input[name="label_check[]"]').is(':checked') ? '✔' : '';
+                    var labelHtml = `<p>${labelText}: ${labelCheck}</p>`;
+                    previewHtml += labelHtml;
+                });
+
                 $('#preview-content').html(previewHtml);
             }
 
             $('#add-row').click(function() {
                 $('#invoice-details-table').append('<tr><td><input type="date" name="table_date[]"></td><td><input type="text" name="table_ticket[]"></td><td><input type="text" name="table_truck[]"></td><td><input type="number" name="table_hours[]"></td><td><input type="number" name="table_price[]"></td><td><input type="text" name="table_location[]"></td></tr>');
+                updatePreview();
+            });
+
+            $('#add-label-row').click(function() {
+                $('#labels-table').append('<tr><td><input type="text" name="label_text[]"></td><td><input type="checkbox" name="label_check[]"></td></tr>');
                 updatePreview();
             });
 
