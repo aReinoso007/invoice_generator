@@ -57,18 +57,34 @@ def generate_invoice():
     p = canvas.Canvas(output, pagesize=letter)
     width, height = letter
 
-    # Add Bill To and Invoice information
+    styles = getSampleStyleSheet()
     margin = 30
-    p.drawString(margin, height - 40, f'Bill To:')
-    p.drawString(margin, height - 60, bill_to)
-    p.drawString(width - 200, height - 40, f'Invoice: {invoice_number}')
-    p.drawString(width - 200, height - 60, f'Date: {date}')
+
+    # Add company information header
+    company_info = """
+        <para align=center spaceb=3>
+        <b>JO TRUCKING LLC</b><br/>
+        213 North 16TH ST<br/>
+        Bloomfield, NJ 07003<br/>
+        Tel: (973)288-55022 / (973)336-7692
+        </para>
+    """
+    company_info_paragraph = Paragraph(company_info, styles['Normal'])
+    company_info_paragraph.wrapOn(p, width - 2 * margin, height)
+    company_info_paragraph.drawOn(p, margin, height - 100)
+    
+    # Add Bill To and Invoice information
+    p.drawString(margin, height - 140, f'Bill To:')
+    bill_to_paragraph = Paragraph(bill_to, styles['Normal'])
+    bill_to_paragraph.wrapOn(p, width - 2 * margin, height)
+    bill_to_paragraph.drawOn(p, margin, height - 160)
+    p.drawString(width - 200, height - 140, f'Invoice: {invoice_number}')
+    p.drawString(width - 200, height - 160, f'Date: {date}')
 
     # Add table header
     table_data = [['Date', 'Ticket', 'Truck #', 'Hours', 'Price Per Hour', 'Total', 'Location']]
     
     # Add rows to the table
-    styles = getSampleStyleSheet()
     for index, row in df.iterrows():
         table_data.append([
             str(row['date']),
@@ -101,7 +117,7 @@ def generate_invoice():
 
     # Calculate the table width and position it with margins
     table.wrapOn(p, width, height)
-    table.drawOn(p, margin, height - 200)  # Add left margin
+    table.drawOn(p, margin, height - 300)  # Adjust the position to account for the wrapped Bill To text
     
     p.showPage()
     p.save()
