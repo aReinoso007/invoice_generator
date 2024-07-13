@@ -121,7 +121,7 @@ def generate_invoice():
         ])
     
     # Add summary row
-    table_data_pdf.append(['', '', '', f'Total Hours: {total_hours}', '', f'Total: {total_amount}', ''])
+    table_data_pdf.append(['', '', '', f'Total Hours: {total_hours}', '', f'Total: ${total_amount}', ''])
 
     print("PDF Table Data:", table_data_pdf)
     

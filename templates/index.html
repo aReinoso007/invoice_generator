@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Generator</title>
+    <title>JO Trucking Biles</title>
     <style>
         table {
             width: 100%;
@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-    <h1>Invoice Generator</h1>
+    <h1>Generador de Biles</h1>
     <form id="invoice-form">
         <label for="bill_to">Bill To:</label>
         <textarea id="bill_to" name="bill_to" rows="3" cols="40"></textarea><br><br>
@@ -32,7 +32,7 @@
         <label for="date">Date:</label>
         <input type="text" id="date" name="date"><br><br>
 
-        <h2>Table Rows</h2>
+        <h2>Detalles</h2>
         <table id="invoice-table">
             <thead>
                 <tr>
@@ -57,8 +57,8 @@
                 </tr>
             </tbody>
         </table>
-        <button type="button" onclick="addRow()">Add Row</button><br><br>
-        <input type="submit" value="Generate Invoice">
+        <button type="button" onclick="addRow()">Agregar Detalle</button><br><br>
+        <input type="submit" value="Generar Documento">
     </form>
 
     <h2>Preview</h2>
