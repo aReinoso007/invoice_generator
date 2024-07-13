@@ -7,7 +7,7 @@ from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from reportlab.platypus import Table, TableStyle, Paragraph
+from reportlab.platypus import Table, TableStyle, Paragraph, SimpleDocTemplate, Spacer
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -66,11 +66,12 @@ def generate_invoice():
 
     # Create a PDF
     output = io.BytesIO()
-    p = canvas.Canvas(output, pagesize=letter)
-    width, height = letter
+    doc = SimpleDocTemplate(output, pagesize=letter,
+                            leftMargin=inch, rightMargin=inch, topMargin=inch, bottomMargin=inch)
 
+    elements = []
     styles = getSampleStyleSheet()
-    margin = 30
+    margin = inch
 
     # Add company information header
     company_info = """
@@ -81,17 +82,16 @@ def generate_invoice():
         Tel: (973)288-55022 / (973)336-7692
         </para>
     """
-    company_info_paragraph = Paragraph(company_info, styles['Normal'])
-    company_info_paragraph.wrapOn(p, width - 2 * margin, height)
-    company_info_paragraph.drawOn(p, margin, height - 100)
-    
+    elements.append(Paragraph(company_info, styles['Normal']))
+    elements.append(Spacer(1, 12))
+
     # Add Bill To and Invoice information
-    p.drawString(margin, height - 140, f'Bill To:')
-    bill_to_paragraph = Paragraph(bill_to, styles['Normal'])
-    bill_to_paragraph.wrapOn(p, width - 2 * margin, height)
-    bill_to_paragraph.drawOn(p, margin, height - 160)
-    p.drawString(width - 200, height - 140, f'Invoice: {invoice_number}')
-    p.drawString(width - 200, height - 160, f'Date: {date}')
+    elements.append(Paragraph(f'Bill To:', styles['Normal']))
+    elements.append(Paragraph(bill_to, styles['Normal']))
+    elements.append(Spacer(1, 12))
+    elements.append(Paragraph(f'Invoice: {invoice_number}', styles['Normal']))
+    elements.append(Paragraph(f'Date: {date}', styles['Normal']))
+    elements.append(Spacer(1, 24))
 
     # Define a bold style for the table header
     bold_style = ParagraphStyle(name='Bold', parent=styles['Normal'], fontName='Helvetica-Bold')
@@ -125,8 +125,11 @@ def generate_invoice():
 
     print("PDF Table Data:", table_data_pdf)
     
+    # Calculate available width for the table
+    available_width = doc.width
+
     # Create the table
-    col_widths = [(width - 2 * margin) / 7] * 7  # Adjust column widths to fill the page width with margins
+    col_widths = [available_width / 7] * 7  # Adjust column widths to fill the page width with margins
     table = Table(table_data_pdf, colWidths=col_widths)
     table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
@@ -141,20 +144,12 @@ def generate_invoice():
         ('WORDWRAP', (0, 0), (-1, -1), 'LTR')
     ]))
 
-    # Calculate the height of the table
-    table_height = table.wrap(width, height)[1]
-    available_height = height - 300 - table_height
+    # Add the table to the elements list
+    elements.append(table)
 
-    # Set a fixed starting position for the table to avoid it being too far down
-    fixed_table_position = height - 450  # Adjust this value as needed
+    # Build the PDF
+    doc.build(elements)
 
-    # Ensure the table doesn't overlap with other elements
-    table.wrapOn(p, width, height)
-    table.drawOn(p, margin, fixed_table_position)
-    
-    p.showPage()
-    p.save()
-    
     output.seek(0)
 
     print("PDF generated successfully.")
