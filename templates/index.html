@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice Generator</title>
+    <title>Generador de Biles</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
@@ -53,7 +53,7 @@
     </style>
 </head>
 <body>
-    <h1>Invoice Generator</h1>
+    <h1>Generador de Biles</h1>
     <form id="invoice-form">
         <label for="company_name">Company Name:</label>
         <input type="text" id="company_name" name="company_name" required>
@@ -76,7 +76,7 @@
                 <th>Hours</th>
                 <th>Price Per Hour</th>
                 <th>Location</th>
-                <th>Remove</th>
+                <th>Eliminar</th>
             </tr>
             <tr>
                 <td><input type="date" name="table_date[]"></td>
@@ -88,14 +88,14 @@
                 <td class="remove-row">X</td>
             </tr>
         </table>
-        <button type="button" id="add-row">Add Row</button>
+        <button type="button" id="add-row">Agregar detalle</button>
 
-        <h3>Labels with Checkmarks</h3>
+        <h3>Informacion de los carros</h3>
         <table id="labels-table">
             <tr>
-                <th>Label</th>
+                <th>Carro</th>
                 <th>Check</th>
-                <th>Remove</th>
+                <th>Eliminar</th>
             </tr>
             <tr>
                 <td><input type="text" name="label_text[]"></td>
@@ -109,7 +109,7 @@
     </form>
 
     <div class="preview" id="invoice-preview">
-        <h3>Invoice Preview</h3>
+        <h3>Vista Previa del Bil</h3>
         <div id="preview-content">
             <!-- Preview content will be updated dynamically -->
         </div>

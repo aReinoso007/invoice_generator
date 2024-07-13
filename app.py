@@ -30,17 +30,11 @@ def index():
 @app.route('/generate-invoice', methods=['POST'])
 def generate_invoice():
     data = request.json
-    print("Received data:", data)
-
     # Extract and format additional fields
     company_name = data.get('company_name', '')
     company_address = data.get('company_address', '')
     invoice_number = data.get('invoice_number', '')
     date = data.get('date', '')
-    print("Company Name:", company_name)
-    print("Company Address:", company_address)
-    print("Invoice Number:", invoice_number)
-    print("Date:", date)
 
     # Ensure table data is in list format
     table_data = {
@@ -57,7 +51,6 @@ def generate_invoice():
         if not isinstance(value, list):
             table_data[key] = [value]
 
-    print("Table data:", table_data)
 
     df = pd.DataFrame(table_data)
 
@@ -68,7 +61,6 @@ def generate_invoice():
     df["Total"] = df["hours"] * df["price"]
     total_hours = df["hours"].sum()
     total_amount = df["Total"].sum()
-    print("DataFrame:", df)
 
     # Extract label data
     labels = data.get('label_text[]', [])
@@ -80,8 +72,6 @@ def generate_invoice():
     if not isinstance(checks, list):
         checks = [checks]
 
-    print("Labels:", labels)
-    print("Checks:", checks)
 
     # Create a PDF
     output = io.BytesIO()
@@ -158,9 +148,7 @@ def generate_invoice():
         '', '', '', f'Total Hours: {total_hours}', '', f'Total: ${total_amount}', ''
     ]
     table_data_pdf.append(summary_row)
-
-    print("PDF Table Data:", table_data_pdf)
-    
+        
     # Calculate available width for the table
     available_width = doc.width
 
