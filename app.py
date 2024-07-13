@@ -5,11 +5,10 @@ import json
 import os
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.platypus import Table, TableStyle, Paragraph, SimpleDocTemplate, Spacer
-from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 
 app = Flask(__name__)
 
@@ -31,11 +30,15 @@ def index():
 @app.route('/generate-invoice', methods=['POST'])
 def generate_invoice():
     data = request.json
+    print("Received data:", data)
+
     # Extract and format additional fields
-    bill_to = data.get('bill_to', [''])[0]
-    invoice_number = data.get('invoice_number', [''])[0]
-    date = data.get('date', [''])[0]
-    print("Bill To:", bill_to)
+    company_name = data.get('company_name', '')
+    company_address = data.get('company_address', '')
+    invoice_number = data.get('invoice_number', '')
+    date = data.get('date', '')
+    print("Company Name:", company_name)
+    print("Company Address:", company_address)
     print("Invoice Number:", invoice_number)
     print("Date:", date)
 
@@ -48,7 +51,14 @@ def generate_invoice():
         'price': data.get('table_price[]', []),
         'location': data.get('table_location[]', [])
     }
-    
+
+    # Ensure all values are lists
+    for key, value in table_data.items():
+        if not isinstance(value, list):
+            table_data[key] = [value]
+
+    print("Table data:", table_data)
+
     df = pd.DataFrame(table_data)
 
     # Replace empty strings with zero before converting to float
@@ -89,9 +99,14 @@ def generate_invoice():
             Paragraph(f'Invoice: {invoice_number}', styles['Normal'])
         ],
         [
-            Paragraph(bill_to, styles['Normal']),
+            Paragraph(company_name, styles['Normal']),
             '',
             Paragraph(f'Date: {date}', styles['Normal'])
+        ],
+        [
+            Paragraph(company_address, styles['Normal']),
+            '',
+            ''
         ]
     ]
     invoice_table = Table(invoice_details, colWidths=[4 * inch, 0.5 * inch, 2 * inch])

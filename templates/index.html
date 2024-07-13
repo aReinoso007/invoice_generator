@@ -3,137 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JO Trucking Biles</title>
+    <title>Invoice Generator</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1, h3 {
+            text-align: center;
+        }
+        form {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 800px;
+        }
+        label, input, textarea {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        table, th, td {
-            border: 1px solid black;
-        }
         th, td {
-            padding: 10px;
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
         }
         th {
             background-color: #f2f2f2;
         }
+        #add-row {
+            margin-bottom: 20px;
+        }
+        .preview {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 800px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
     </style>
 </head>
 <body>
-    <h1>Generador de Biles</h1>
+    <h1>Invoice Generator</h1>
     <form id="invoice-form">
-        <label for="bill_to">Bill To:</label>
-        <textarea id="bill_to" name="bill_to" rows="3" cols="40"></textarea><br><br>
+        <label for="company_name">Company Name:</label>
+        <input type="text" id="company_name" name="company_name" required>
+
+        <label for="company_address">Company Address:</label>
+        <textarea id="company_address" name="company_address" rows="3" required></textarea>
+
         <label for="invoice_number">Invoice Number:</label>
-        <input type="text" id="invoice_number" name="invoice_number"><br><br>
+        <input type="text" id="invoice_number" name="invoice_number" required>
+
         <label for="date">Date:</label>
-        <input type="text" id="date" name="date"><br><br>
+        <input type="date" id="date" name="date" required>
 
-        <h2>Detalles</h2>
-        <table id="invoice-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Ticket</th>
-                    <th>Truck #</th>
-                    <th>Hours</th>
-                    <th>Price Per Hour</th>
-                    <th>Location</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="table-body">
-                <tr>
-                    <td><input type="text" name="table_date[]"></td>
-                    <td><input type="text" name="table_ticket[]"></td>
-                    <td><input type="text" name="table_truck[]"></td>
-                    <td><input type="text" name="table_hours[]"></td>
-                    <td><input type="text" name="table_price[]"></td>
-                    <td><input type="text" name="table_location[]"></td>
-                    <td><button type="button" onclick="removeRow(this)">Remove</button></td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" onclick="addRow()">Agregar Detalle</button><br><br>
-        <input type="submit" value="Generar Documento">
-    </form>
-
-    <h2>Preview</h2>
-    <div id="preview"></div>
-
-    <script>
-        function addRow() {
-            const tableBody = document.getElementById('table-body');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td><input type="text" name="table_date[]"></td>
+        <h3>Invoice Details</h3>
+        <table id="invoice-details-table">
+            <tr>
+                <th>Date</th>
+                <th>Ticket</th>
+                <th>Truck #</th>
+                <th>Hours</th>
+                <th>Price Per Hour</th>
+                <th>Location</th>
+            </tr>
+            <tr>
+                <td><input type="date" name="table_date[]"></td>
                 <td><input type="text" name="table_ticket[]"></td>
                 <td><input type="text" name="table_truck[]"></td>
-                <td><input type="text" name="table_hours[]"></td>
-                <td><input type="text" name="table_price[]"></td>
+                <td><input type="number" name="table_hours[]"></td>
+                <td><input type="number" name="table_price[]"></td>
                 <td><input type="text" name="table_location[]"></td>
-                <td><button type="button" onclick="removeRow(this)">Remove</button></td>
-            `;
-            tableBody.appendChild(newRow);
-            updatePreview();
-        }
+            </tr>
+        </table>
+        <button type="button" id="add-row">Add Row</button>
+        <button type="submit">Generate Invoice</button>
+    </form>
 
-        function removeRow(button) {
-            const row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-            updatePreview();
-        }
+    <div class="preview" id="invoice-preview">
+        <h3>Invoice Preview</h3>
+        <div id="preview-content">
+            <!-- Preview content will be updated dynamically -->
+        </div>
+    </div>
 
-        document.getElementById('invoice-form').addEventListener('input', updatePreview);
+    <script>
+        $(document).ready(function() {
+            function updatePreview() {
+                var companyName = $('#company_name').val();
+                var companyAddress = $('#company_address').val().replace(/\n/g, '<br>');
+                var invoiceNumber = $('#invoice_number').val();
+                var date = $('#date').val();
 
-        function updatePreview() {
-            const tableBody = document.getElementById('table-body');
-            let previewHTML = '<table><thead><tr><th>Date</th><th>Ticket</th><th>Truck #</th><th>Hours</th><th>Price Per Hour</th><th>Total</th><th>Location</th></tr></thead><tbody>';
-            const rows = tableBody.getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-                const cells = rows[i].getElementsByTagName('input');
-                let total = 0;
-                if (cells[3].value && cells[4].value) {
-                    total = parseFloat(cells[3].value) * parseFloat(cells[4].value);
-                }
-                previewHTML += '<tr>';
-                for (let j = 0; j < cells.length; j++) {
-                    previewHTML += `<td>${cells[j].value}</td>`;
-                }
-                previewHTML += `<td>${total}</td></tr>`;
+                var previewHtml = `
+                    <p><b>Company Name:</b> ${companyName}</p>
+                    <p><b>Company Address:</b><br> ${companyAddress}</p>
+                    <p><b>Invoice Number:</b> ${invoiceNumber}</p>
+                    <p><b>Date:</b> ${date}</p>
+                    <table>
+                        <tr>
+                            <th>Date</th>
+                            <th>Ticket</th>
+                            <th>Truck #</th>
+                            <th>Hours</th>
+                            <th>Price Per Hour</th>
+                            <th>Location</th>
+                        </tr>
+                `;
+
+                $('#invoice-details-table tr:gt(0)').each(function() {
+                    var row = $(this);
+                    var rowData = `
+                        <tr>
+                            <td>${row.find('input[name="table_date[]"]').val()}</td>
+                            <td>${row.find('input[name="table_ticket[]"]').val()}</td>
+                            <td>${row.find('input[name="table_truck[]"]').val()}</td>
+                            <td>${row.find('input[name="table_hours[]"]').val()}</td>
+                            <td>${row.find('input[name="table_price[]"]').val()}</td>
+                            <td>${row.find('input[name="table_location[]"]').val()}</td>
+                        </tr>
+                    `;
+                    previewHtml += rowData;
+                });
+
+                previewHtml += '</table>';
+                $('#preview-content').html(previewHtml);
             }
-            previewHTML += '</tbody></table>';
-            document.getElementById('preview').innerHTML = previewHTML;
-        }
 
-        document.getElementById('invoice-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const data = {};
-            formData.forEach((value, key) => {
-                if (!data[key]) {
-                    data[key] = [];
-                }
-                data[key].push(value);
+            $('#add-row').click(function() {
+                $('#invoice-details-table').append('<tr><td><input type="date" name="table_date[]"></td><td><input type="text" name="table_ticket[]"></td><td><input type="text" name="table_truck[]"></td><td><input type="number" name="table_hours[]"></td><td><input type="number" name="table_price[]"></td><td><input type="text" name="table_location[]"></td></tr>');
+                updatePreview();
             });
-            const response = await fetch('/generate-invoice', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+
+            $('#invoice-form').on('input', 'input, textarea', function() {
+                updatePreview();
             });
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'invoice.pdf';
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+
+            $('#invoice-form').submit(function(event) {
+                event.preventDefault();
+
+                var formData = $(this).serializeArray();
+                var data = {};
+                formData.forEach(function(item) {
+                    if (data[item.name]) {
+                        if (Array.isArray(data[item.name])) {
+                            data[item.name].push(item.value);
+                        } else {
+                            data[item.name] = [data[item.name], item.value];
+                        }
+                    } else {
+                        data[item.name] = item.value;
+                    }
+                });
+
+                $.ajax({
+                    url: '/generate-invoice',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    xhrFields: {
+                        responseType: 'blob'
+                    },
+                    success: function(response) {
+                        var blob = new Blob([response], { type: 'application/pdf' });
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'invoice.pdf';
+                        document.body.append(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(error);
+                    }
+                });
+            });
+
+            // Initialize preview on page load
+            updatePreview();
         });
     </script>
 </body>
