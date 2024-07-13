@@ -31,8 +31,6 @@ def index():
 @app.route('/generate-invoice', methods=['POST'])
 def generate_invoice():
     data = request.json
-    print("Received data:", data)
-
     # Extract and format additional fields
     bill_to = data.get('bill_to', [''])[0]
     invoice_number = data.get('invoice_number', [''])[0]
@@ -50,9 +48,7 @@ def generate_invoice():
         'price': data.get('table_price[]', []),
         'location': data.get('table_location[]', [])
     }
-
-    print("Table data:", table_data)
-
+    
     df = pd.DataFrame(table_data)
 
     # Replace empty strings with zero before converting to float
@@ -85,12 +81,21 @@ def generate_invoice():
     elements.append(Paragraph(company_info, styles['Normal']))
     elements.append(Spacer(1, 12))
 
-    # Add Bill To and Invoice information
-    elements.append(Paragraph(f'Bill To:', styles['Normal']))
-    elements.append(Paragraph(bill_to, styles['Normal']))
-    elements.append(Spacer(1, 12))
-    elements.append(Paragraph(f'Invoice: {invoice_number}', styles['Normal']))
-    elements.append(Paragraph(f'Date: {date}', styles['Normal']))
+    # Add Bill To and Invoice information using a table
+    invoice_details = [
+        [
+            Paragraph(f'Bill To:', styles['Normal']),
+            '',
+            Paragraph(f'Invoice: {invoice_number}', styles['Normal'])
+        ],
+        [
+            Paragraph(bill_to, styles['Normal']),
+            '',
+            Paragraph(f'Date: {date}', styles['Normal'])
+        ]
+    ]
+    invoice_table = Table(invoice_details, colWidths=[4 * inch, 0.5 * inch, 2 * inch])
+    elements.append(invoice_table)
     elements.append(Spacer(1, 24))
 
     # Define a bold style for the table header
@@ -121,7 +126,10 @@ def generate_invoice():
         ])
     
     # Add summary row
-    table_data_pdf.append(['', '', '', f'Total Hours: {total_hours}', '', f'Total: ${total_amount}', ''])
+    summary_row = [
+        '', '', '', f'Total Hours: {total_hours}', '', f'Total: ${total_amount}', ''
+    ]
+    table_data_pdf.append(summary_row)
 
     print("PDF Table Data:", table_data_pdf)
     
@@ -141,7 +149,11 @@ def generate_invoice():
         ('BACKGROUND', (0, 1), (-1, -1), colors.transparent),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('WORDWRAP', (0, 0), (-1, -1), 'LTR')
+        ('WORDWRAP', (0, 0), (-1, -1), 'LTR'),
+        # Span the total hours and total amount cells
+        ('SPAN', (0, -1), (2, -1)),  # Merge first three columns for Total Hours
+        ('SPAN', (3, -1), (4, -1)),  # Merge next two columns for Total Hours value
+        ('SPAN', (5, -1), (6, -1))   # Merge last two columns for Total value
     ]))
 
     # Add the table to the elements list
