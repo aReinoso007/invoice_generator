@@ -58,8 +58,9 @@ def generate_invoice():
     width, height = letter
 
     # Add Bill To and Invoice information
-    p.drawString(30, height - 40, f'Bill To:')
-    p.drawString(30, height - 60, bill_to)
+    margin = 30
+    p.drawString(margin, height - 40, f'Bill To:')
+    p.drawString(margin, height - 60, bill_to)
     p.drawString(width - 200, height - 40, f'Invoice: {invoice_number}')
     p.drawString(width - 200, height - 60, f'Date: {date}')
 
@@ -83,24 +84,24 @@ def generate_invoice():
     table_data.append(['', '', '', f'Total Hours: {total_hours}', '', f'Total: {total_amount}', ''])
     
     # Create the table
-    col_widths = [width / 7] * 7  # Adjust column widths to fill the page width
+    col_widths = [(width - 2 * margin) / 7] * 7  # Adjust column widths to fill the page width with margins
     table = Table(table_data, colWidths=col_widths)
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.transparent),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 12),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.transparent),
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('WORDWRAP', (0, 0), (-1, -1), 'LTR')
     ]))
 
-    # Calculate the table width and position it in the center
+    # Calculate the table width and position it with margins
     table.wrapOn(p, width, height)
-    table.drawOn(p, 0, height - 200)  # Center the table horizontally
+    table.drawOn(p, margin, height - 200)  # Add left margin
     
     p.showPage()
     p.save()
